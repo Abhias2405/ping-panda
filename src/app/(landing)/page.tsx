@@ -1,8 +1,7 @@
-import { ShinyButton } from "./components/shiny-button"
+import { ShinyButton } from "@/components/shiny-button"
 import { Check } from "lucide-react"
-import { Heading } from "./components/heading"
-import { MaxWidthWrapper } from "./components/max-width-wrapper"
-
+import { Heading } from "@/components/heading"
+import { MaxWidthWrapper } from "@/components/max-width-wrapper"
 const Page = () => {
   
 
