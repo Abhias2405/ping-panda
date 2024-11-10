@@ -1,12 +1,22 @@
 "use client"
 
 import { LoadingSpinner } from "@/components/loading-spinner"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { client } from "@/lib/client"
-import { useQuery } from "@tanstack/react-query"
-import { format } from "date-fns"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { format, formatDistanceToNow } from "date-fns"
+import { ArrowRight, BarChart2, Clock, Database, Trash2 } from "lucide-react"
+import Link from "next/link"
+import { useState } from "react"
+import { DashboardEmptyState } from "./dashboard-empty-state"
+
+
 
 export const DashboardPageContent = () => {
   
+
+ const [deletingCategory, setDeletingCategory] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const { data: categories, isPending: isEventCategoriesLoading } = useQuery({
     queryKey: ["user-event-categories"],
@@ -17,7 +27,17 @@ export const DashboardPageContent = () => {
     },
   })
 
-  
+  const { mutate: deleteCategory, isPending: isDeletingCategory } = useMutation(
+    {
+      mutationFn: async (name: string) => {
+        await client.category.deleteCategory.$post({ name })
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["user-event-categories"] })
+        setDeletingCategory(null)
+      },
+    }
+  )
 
   if (isEventCategoriesLoading) {
     return (
@@ -28,9 +48,8 @@ export const DashboardPageContent = () => {
   }
 
   if (!categories || categories.length === 0) {
-    return <div>empty</div>
+    return <DashboardEmptyState />
   }
-
 
  
 
@@ -67,13 +86,54 @@ export const DashboardPageContent = () => {
                 </div>
               </div>
 
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center text-sm/5 text-gray-600">
+                  <Clock className="size-4 mr-2 text-brand-500" />
+                  <span className="font-medium">Last ping:</span>
+                  <span className="ml-1">
+                    {category.lastPing
+                      ? formatDistanceToNow(category.lastPing) + " ago"
+                      : "Never"}
+                  </span>
+                </div>
+                <div className="flex items-center text-sm/5 text-gray-600">
+                  <Database className="size-4 mr-2 text-brand-500" />
+                  <span className="font-medium">Unique fields:</span>
+                  <span className="ml-1">{category.uniqueFieldCount || 0}</span>
+                </div>
+                <div className="flex items-center text-sm/5 text-gray-600">
+                  <BarChart2 className="size-4 mr-2 text-brand-500" />
+                  <span className="font-medium">Events this month:</span>
+                  <span className="ml-1">{category.eventsCount || 0}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <Link
+                  href={`/dashboard/category/${category.name}`}
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className: "flex items-center gap-2 text-sm",
+                  })}
+                >
+                  View all <ArrowRight className="size-4" />
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-500 hover:text-red-600 transition-colors"
+                  aria-label={`Delete ${category.name} category`}
+                  onClick={() => setDeletingCategory(category.name)}
+                >
+                  <Trash2 className="size-5" />
+                </Button>
+              </div>
               
             </div>
           </li>
         ))}
       </ul>
-
-      
     </>
   )
 }
