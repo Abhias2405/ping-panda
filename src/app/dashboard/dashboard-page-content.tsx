@@ -2,6 +2,7 @@
 
 import { LoadingSpinner } from "@/components/loading-spinner"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Modal } from "@/components/ui/modal"
 import { client } from "@/lib/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { format, formatDistanceToNow } from "date-fns"
@@ -10,12 +11,8 @@ import Link from "next/link"
 import { useState } from "react"
 import { DashboardEmptyState } from "./dashboard-empty-state"
 
-
-
 export const DashboardPageContent = () => {
-  
-
- const [deletingCategory, setDeletingCategory] = useState<string | null>(null)
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const { data: categories, isPending: isEventCategoriesLoading } = useQuery({
@@ -50,8 +47,6 @@ export const DashboardPageContent = () => {
   if (!categories || categories.length === 0) {
     return <DashboardEmptyState />
   }
-
- 
 
   return (
     <>
@@ -129,11 +124,43 @@ export const DashboardPageContent = () => {
                   <Trash2 className="size-5" />
                 </Button>
               </div>
-              
             </div>
           </li>
         ))}
       </ul>
+
+      <Modal
+        showModal={!!deletingCategory}
+        setShowModal={() => setDeletingCategory(null)}
+        className="max-w-md p-8"
+      >
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg/7 font-medium tracking-tight text-gray-950">
+              Delete Category
+            </h2>
+            <p className="text-sm/6 text-gray-600">
+              Are you sure you want to delete the category "{deletingCategory}"?
+              This action cannot be undone.
+            </p>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <Button variant="outline" onClick={() => setDeletingCategory(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                deletingCategory && deleteCategory(deletingCategory)
+              }
+              disabled={isDeletingCategory}
+            >
+              {isDeletingCategory ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </>
   )
 }

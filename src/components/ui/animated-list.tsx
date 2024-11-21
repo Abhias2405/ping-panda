@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useState,
 } from "react"
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion"
 
 export interface AnimatedListProps {
   className?: string

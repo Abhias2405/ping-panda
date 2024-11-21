@@ -1,10 +1,10 @@
 import { db } from "@/db"
-import { startOfDay, startOfMonth, startOfWeek } from "date-fns"
 import { router } from "../__internals/router"
 import { privateProcedure } from "../procedures"
+import { startOfDay, startOfMonth, startOfWeek } from "date-fns"
 import { z } from "zod"
 import { CATEGORY_NAME_VALIDATOR } from "@/lib/validators/category-validator"
-import { parseColor } from "@/lib/utils"
+import { parseColor } from "@/utils"
 import { HTTPException } from "hono/http-exception"
 
 export const categoryRouter = router({
@@ -78,8 +78,7 @@ export const categoryRouter = router({
       })
 
       return c.json({ success: true })
-    }
-  ),
+    }),
 
   createEventCategory: privateProcedure
     .input(
@@ -107,8 +106,7 @@ export const categoryRouter = router({
 
       return c.json({ eventCategory })
     }),
-  
-  
+
   insertQuickstartCategories: privateProcedure.mutation(async ({ ctx, c }) => {
     const categories = await db.eventCategory.createMany({
       data: [
@@ -222,6 +220,4 @@ export const categoryRouter = router({
         uniqueFieldCount,
       })
     }),
-  
-
 })
